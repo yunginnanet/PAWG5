@@ -1,39 +1,21 @@
-# bitraft
+# pawg5
 
-[![Go Report Card](https://goreportcard.com/badge/yunginnanet/bitraft)](https://goreportcard.com/report/yunginnanet/bitraft)
-[![GoDoc](https://godoc.org/git.tcp.direct/kayos/bitraft?status.svg)](https://pkg.go.dev/git.tcp.direct/kayos/bitraft)
+[![Go Report Card](https://goreportcard.com/badge/yunginnanet/pawg5)](https://goreportcard.com/report/yunginnanet/pawg5)
+[![GoDoc](https://godoc.org/git.tcp.direct/kayos/pawg5?status.svg)](https://pkg.go.dev/git.tcp.direct/kayos/pawg5)
 
-A [Bitcask](https://git.mills.io/prologic/bitcask) Distributed Key/Value store
-using [Raft](https://github.com/hashicorp/raft) for concensus with a
-[Redis](https://redis.org) compatible API written in [Go](https://golang.org).
+a ~~P.A.W.G rub~~ [pogreb](https://git.mills.io/prologic/bitcask) distributed key/value store
+using [raft](https://github.com/hashicorp/raft) for concensus with a
+[redis](https://redis.org) compatible API
 
-Based off of [kvnode](https://github.com/tidwall/kvnode).
-(See [LICENSE.old](/LICENSE.old))
+based off of [kvnode](https://github.com/tidwall/kvnode) and [bitraft](https://git.mills.io/prologic/bitraft)
+(See [LICENSE.old](/LICENSE.old) and [LICENSE.prologic](/LICENSE.prologic))
 
-- Redis compatible API
-- Bitcask disk-based storage
-- Raft support with [Finn](https://github.com/tidwall/finn) commands
-- Compatible with existing Redis clients
+- redis compatible API
+- pogreb disk-based storage
+- Raft support with [finn](https://github.com/tidwall/finn) commands
+- compatible with existing Redis clients (probably?)
 
-## Usage
-
-```#!bash
-$ go get git.mills.io/prologic/bitraft
-$ bitraft
-```
-
-## Docker
-
-You can also use the [Bitraft Docker Image](https://cloud.docker.com/u/prologic/repository/docker/prologic/bitraft):
-
-```#!bash
-$ docker pull prologic/bitraft
-$ docker run -d -p 4920:4920 prologic/bitraft
-```
-
-## Example session
-
-Commands:
+### works like you'd expect prolly
 
 ```
 SET key value
@@ -44,37 +26,29 @@ FLUSHDB
 SHUTDOWN
 ```
 
-## Backup and Restore
+### back that (*p*)hat (*a*)ss \[up\] (*w*)hite (*g*)irl, \[on\] (5)
 
-To backup data:
 ```
 RAFTSNAPSHOT
 ```
-This will creates a new snapshot in the `data/snapshots` directory.
+this will creates a new snapshot in the `data/snapshots` directory.
 Each snapshot contains two files, `meta.json` and `state.bin`.
-The state file is the database in a compressed format. 
+the state file is the database in a compressed format. 
 The meta file is details about the state including the term, index, crc, and size.
 
-Ideally you call `RAFTSNAPSHOT` and then store the state.bin on some other server like S3.
+ideally you call `RAFTSNAPSHOT` and then store the state.bin on some other server like S3.
 
 To restore:
-- Create a new raft cluster
-- Download the state.bin snapshot
-- Pipe the commands using the `bitraft --parse-snapshot` and `redis-cli --pipe` commands
+- create a new raft cluster
+- download the state.bin snapshot
+- pipe the commands using the `pawg5 --parse-snapshot` and `redis-cli --pipe` commands
 
-Example:
+#### Example:
 ```
-bitraft --parse-snapshot state.bin | redis-cli -h 10.0.1.5 -p 4920 --pipe
+pawg5 --parse-snapshot state.bin | redis-cli -h 10.0.1.5 -p 4920 --pipe
 ```
 
-This will execute all of the `state.bin` commands on the leader at `10.0.1.5:4920`
+this will execute all of the `state.bin` commands on the leader at `10.0.1.5:4920`
 
 
-For information on the `redis-cli --pipe` command see [Redis Mass Insert](https://redis.io/topics/mass-insert).
-
-## License
-
-bitraft source code is available under the MIT [License](/LICENSE).
-
-Previously based off of [kvnode](https://github.com/tidwall/kvnode).
-(See [LICENSE.old](/LICENSE.old))
+for information on the `redis-cli --pipe` command see [Redis Mass Insert](https://redis.io/topics/mass-insert).

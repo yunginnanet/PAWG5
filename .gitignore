@@ -1,9 +1,14 @@
 *~*
 *.bak
-bitraft
+*.db
+*.idx
+*.pack
+*.pix
+*.psg
+lock
+pawg5
 
 /coverage.txt
-/bitraft
 /tmp
 /dist
 */data

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"git.tcp.direct/Mirrors/bitcask-mirror"
+	"github.com/akrylysov/pogreb"
 )
 
 // Restore attempts to restore a database from rd, which implements an io.Reader.
@@ -24,7 +24,7 @@ func (kvm *StateMachine) Restore(rd io.Reader) error {
 		return err
 	}
 	kvm.db = nil
-	kvm.db, err = bitcask.Open(kvm.dir)
+	kvm.db, err = pogreb.Open(kvm.dir, &pogreb.Options{})
 	if err != nil {
 		return err
 	}
@@ -129,27 +129,26 @@ func (kvm *StateMachine) Snapshot(wr io.Writer) error {
 	defer kvm.mu.RUnlock()
 	gzw := gzip.NewWriter(wr)
 
-	err := kvm.db.Fold(func(key []byte) error {
-		var buf []byte
-		value, err := kvm.db.Get(key)
-		if err != nil {
-			return err
-		}
+	iter := kvm.db.Items()
+	var (
+		key     []byte
+		value   []byte
+		iterErr error
+	)
 
-		num := make([]byte, 8)
-		binary.LittleEndian.PutUint64(num, uint64(len(key)))
-		buf = append(buf, num...)
-		buf = append(buf, key...)
-		binary.LittleEndian.PutUint64(num, uint64(len(value)))
-		buf = append(buf, num...)
-		buf = append(buf, value...)
-		if _, err := gzw.Write(buf); err != nil {
+	for key, value, iterErr = iter.Next(); iterErr == nil; key, value, iterErr = iter.Next() {
+		if err := binary.Write(gzw, binary.LittleEndian, uint64(len(key))); err != nil {
 			return err
 		}
-		return nil
-	})
-	if err != nil {
-		return err
+		if _, err := gzw.Write(key); err != nil {
+			return err
+		}
+		if err := binary.Write(gzw, binary.LittleEndian, uint64(len(value))); err != nil {
+			return err
+		}
+		if _, err := gzw.Write(value); err != nil {
+			return err
+		}
 	}
 
 	return gzw.Close()

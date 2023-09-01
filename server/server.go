@@ -2,12 +2,13 @@ package server
 
 import (
 	"errors"
+	"io"
 	"net"
 	"path/filepath"
 	"sync"
 	"time"
 
-	"git.tcp.direct/Mirrors/bitcask-mirror"
+	"github.com/akrylysov/pogreb"
 	"github.com/rs/zerolog/log"
 	"github.com/tidwall/finn"
 	"github.com/tidwall/redcon"
@@ -20,13 +21,15 @@ var (
 )
 
 //goland:noinspection GoExportedElementShouldHaveComment
-func ListenAndServe(addr, join, dir, logdir string, consistency, durability finn.Level) error {
+func ListenAndServe(addr, join, dir, logdir string, consistency, durability finn.Level, logger io.Writer) error {
 	opts := finn.Options{
 		Backend:     finn.FastLog,
 		Consistency: consistency,
 		Durability:  durability,
 		ConnAccept:  AcceptConnection,
+		LogOutput:   logger,
 	}
+
 	m, err := NewStateMachine(dir)
 	if err != nil {
 		return err
@@ -35,6 +38,7 @@ func ListenAndServe(addr, join, dir, logdir string, consistency, durability finn
 	if err != nil {
 		return err
 	}
+
 	defer n.Close()
 
 	select {
@@ -65,7 +69,7 @@ type cmdHandler func(m finn.Applier, conn redcon.Conn, cmd redcon.Command) (inte
 type StateMachine struct {
 	mu     sync.RWMutex
 	dir    string
-	db     *bitcask.Bitcask
+	db     *pogreb.DB
 	dbPath string
 	// TODO: what was "addr" for?
 	//	addr      string
@@ -86,7 +90,7 @@ func NewStateMachine(dir string) (*StateMachine, error) {
 	}
 	var err error
 	kvm.dbPath = filepath.Join(dir, "node.db")
-	kvm.db, err = bitcask.Open(kvm.dir)
+	kvm.db, err = pogreb.Open(kvm.dir, &pogreb.Options{})
 	if err != nil {
 		return nil, err
 	}

@@ -8,9 +8,10 @@ replace launchpad.net/gocheck => github.com/go-check/check v0.0.0-20190902080502
 
 require (
 	git.tcp.direct/Mirrors/bitcask-mirror v0.0.0-20220228092422-1ec4297c7e34
+	github.com/akrylysov/pogreb v0.10.1
+	github.com/gobwas/glob v0.2.3
 	github.com/hashicorp/go-sockaddr v1.0.2
-	github.com/rs/zerolog v1.26.1
-	github.com/sirupsen/logrus v1.8.1
+	github.com/rs/zerolog v1.30.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/finn v0.1.2
@@ -18,6 +19,7 @@ require (
 )
 
 require (
+	git.tcp.direct/kayos/zwrap v0.4.1 // indirect
 	github.com/abcum/lcp v0.0.0-20201209214815-7a3f3840be81 // indirect
 	github.com/armon/go-metrics v0.3.0 // indirect
 	github.com/boltdb/bolt v1.3.1 // indirect
@@ -31,6 +33,8 @@ require (
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/hashicorp/raft v0.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/plar/go-adaptive-radix-tree v1.0.4 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -44,7 +48,7 @@ require (
 	github.com/tidwall/redlog v0.0.0-20180507234857-bbed90f29893 // indirect
 	golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e // indirect
 	golang.org/x/exp v0.0.0-20200228211341-fcea875c7e85 // indirect
-	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

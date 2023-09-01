@@ -1,11 +1,13 @@
 package server
 
 import (
+	"errors"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"git.tcp.direct/Mirrors/bitcask-mirror"
+	"github.com/akrylysov/pogreb"
+	"github.com/gobwas/glob"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/tidwall/finn"
@@ -85,7 +87,7 @@ func (kvm *StateMachine) cmdGet(m finn.Applier, conn redcon.Conn, cmd redcon.Com
 			defer kvm.mu.RUnlock()
 			value, err := kvm.db.Get(key)
 			if err != nil {
-				if err == bitcask.ErrKeyNotFound {
+				if errors.Is(err, bitcask.ErrKeyNotFound) {
 					conn.WriteNull()
 					return nil, nil
 				}
@@ -126,20 +128,36 @@ func (kvm *StateMachine) cmdKeys(m finn.Applier, conn redcon.Conn, cmd redcon.Co
 	if len(cmd.Args) != 2 {
 		return nil, errWrongNumberOfArguments
 	}
+
 	pattern := string(cmd.Args[1])
-	scanPattern := trimPattern(pattern)
+	// scanPattern := trimPattern(pattern)
+	if pattern == "" {
+		return nil, errors.New("invalid pattern")
+	}
+	glb, err := glob.Compile(pattern)
+	if err != nil {
+		return nil, err
+	}
 	return m.Apply(conn, cmd, nil,
 		func(interface{}) (interface{}, error) {
 			kvm.mu.RLock()
 			defer kvm.mu.RUnlock()
 			var keys [][]byte
-			err := kvm.db.Scan([]byte(scanPattern), func(key []byte) error {
-				if ok, _ := filepath.Match(pattern, string(key)); ok {
-					keys = append(keys, []byte(key))
+			iter := kvm.db.Items()
+			var err error
+			var key []byte
+			for key, _, err = iter.Next(); err == nil; key, _, err = iter.Next() {
+				if pattern == "*" {
+					keys = append(keys, key)
+					continue
 				}
-				return nil
-			})
-			if err != nil {
+				println("pattern", pattern, "key", string(key))
+				if ok := glb.Match(string(key)); ok {
+					println("match")
+					keys = append(keys, key)
+				}
+			}
+			if !errors.Is(err, pogreb.ErrIterationDone) {
 				return nil, err
 			}
 			conn.WriteArray(len(keys))

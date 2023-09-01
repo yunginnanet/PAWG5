@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"git.tcp.direct/kayos/zwrap"
 	"github.com/hashicorp/go-sockaddr/template"
 	"github.com/rs/zerolog"
 	flag "github.com/spf13/pflag"
@@ -123,7 +124,7 @@ func main() {
 	bind = mustParse(bind)
 	log.Debug().Str("bind", bind).Msg("bind parsed")
 
-	if err := server.ListenAndServe(bind, join, dir, logdir, lconsistency, ldurability); err != nil {
+	if err := server.ListenAndServe(bind, join, dir, logdir, lconsistency, ldurability, zwrap.Wrap(log)); err != nil {
 		log.Warn().Msgf("%v", err)
 	}
 }
